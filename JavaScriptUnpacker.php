@@ -120,7 +120,7 @@ class JavaScriptUnpacker
         $packed = " $packed ";
         $base = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $encode = function ($count) use (&$encode, $ascii, $base) {
-            return ($count < $ascii ? '' : $encode(intval($count / $ascii))) . $base{$count % $ascii};
+            return ($count < $ascii ? '' : $encode(intval($count / $ascii))) . $base[$count % $ascii];
         };
         $split = '([^a-zA-Z0-9_])';
         while ($count--) {
@@ -165,8 +165,8 @@ class JavaScriptUnpacker
      */
     protected static function isSlashed($buf, $index, $len)
     {
-        if ($buf{$index} === '\\') {
-            if ($len > 1 && $buf{$index - 1} === '\\') {
+        if ($buf[$index] === '\\') {
+            if ($len > 1 && $buf[$index - 1] === '\\') {
                 return self::isSlashed($buf, $index - 2, $len - 2);
             }
             return true;
@@ -185,9 +185,9 @@ class JavaScriptUnpacker
     {
         for ($start = $offset, $len = strlen($buf); $start < $len; $start++) {
             foreach (['"', "'"] as $quote) {
-                if ($buf{$start} === $quote) {
+                if ($buf[$start] === $quote) {
                     for ($i = $start + 1; $i < $len; $i++) {
-                        if ($buf{$i} === $quote && !self::isSlashed($buf, $i - 1, $i - $start - 1)) {
+                        if ($buf[$i] === $quote && !self::isSlashed($buf, $i - 1, $i - $start - 1)) {
                             break;
                         }
                     }
@@ -212,17 +212,17 @@ class JavaScriptUnpacker
     {
         $buf = substr($this->script, $offset);
         $len = strlen($buf);
-        for ($start = 0; $start < $len && $buf{$start} !== $open; $start++);
+        for ($start = 0; $start < $len && $buf[$start] !== $open; $start++);
         for ($i = $start + 1, $skip = 0; $i < $len; $i++) {
-            if ($buf{$i} === $close && 0 === $skip--) {
+            if ($buf[$i] === $close && 0 === $skip--) {
                 break;
             }
             foreach (['"', "'"] as $quote) {
-                if ($buf{$i} === $quote) {
-                    for ($i++; $i < $len && ($buf{$i} !== $quote || $buf{$i - 1} === '\\'); $i++);
+                if ($buf[$i] === $quote) {
+                    for ($i++; $i < $len && ($buf[$i] !== $quote || $buf[$i - 1] === '\\'); $i++);
                 }
             }
-            if ($buf{$i} === $open) {
+            if ($buf[$i] === $open) {
                 $skip++;
             }
         }
@@ -254,7 +254,7 @@ class JavaScriptUnpacker
         if (($pos = strpos(strtolower(preg_replace('/[\x03-\x20]+/', '', $str)), self::$JS_FUNC)) !== false) {
             $start = -1;
             do {
-                while (preg_match('/[\x03-\x20]/', $str{++$start}));
+                while (preg_match('/[\x03-\x20]/', $str[++$start]));
             } while (0 < $pos--);
             return true;
         }
